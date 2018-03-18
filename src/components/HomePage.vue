@@ -12,11 +12,26 @@
       <p>Let us give you a recommendation!</p>
 
       <button v-on:click="query()">Randomize</button>
+      <button v-on:click="addItem()">Add</button>
 
       <br/>
 
       <div id="results" class="results">
         <span v-html="output"></span>
+      </div>
+      <div id="remarks" class="remarks">
+        <h2>WATCH LIST</h2>
+      </div>
+      <div id="list" class="list">
+        <ul>
+          <li v-for="item in items">
+            <label>{{ item.text }}</label>
+            <button v-on:click="changePriority(item)">Priority</button>
+            <p v-if="item.priority">High</p>
+            <p v-else>Low</p>
+            <button v-on:click="deleteItem(item)" class="delete">X</button>
+          </li>
+        </ul>
       </div>
 
       <div id="remarks" class="remarks">
@@ -27,7 +42,7 @@
 
     <div class="gitHubLink">
       <center>
-      <a href="https://github.com/tcniedfeldt/Labrashow">My GitHub Repository</a>
+      <a href="https://github.com/tcniedfeldt/LabrashowVue">My GitHub Repository</a>
       </center>
     </div>
   </div>
@@ -42,17 +57,20 @@ export default {
 		return {
 			output: '',
 			posts: [],
-			errors: []
+			errors: [],
+      items: [],
+      text: ''
 		}
 	},
 	methods: {
 		query: function(e) {
-                	var movie = Math.floor(Math.random() * 1000) + 2;
-                	var myurl="https://api.themoviedb.org/3/movie/" + movie + "?api_key=c59173680a889c0419dae6d8320bd867";
+      var movie = Math.floor(Math.random() * 1000) + 2;
+      var myurl="https://api.themoviedb.org/3/movie/" + movie + "?api_key=c59173680a889c0419dae6d8320bd867";
 
-			axios.get(myurl)
-			.then( response => {
+			axios.get(myurl).then( response => {
 				console.log(response);
+        this.text = response.data.title;
+
 
                                 var results = '';
                                 results += '<div class="poster_image"><img src="https://image.tmdb.org/t/p/w154' + response.data.poster_path + '"/></div>';
@@ -80,7 +98,57 @@ export default {
 			.catch (e => {
 				this.errors.push(e);
 			})
-		}
+		},
+
+
+
+
+
+
+    getItems: function() {
+       axios.get("http://localhost:3000/api/items").then(response => {
+	 this.items = response.data;
+	 return true;
+       }).catch(err => {
+       });
+     },
+     addItem: function() {
+       if (this.text == '') {
+          return;
+       }
+
+       axios.post("http://localhost:3000/api/items", {
+	 text: this.text
+       }).then(response => {
+	 this.text = "";
+	 this.getItems();
+	 return true;
+       }).catch(err => {
+       });
+     },
+     changePriority: function(item) {
+        var newPriority = false;
+        if (item.priority) {
+          newPriority = false
+        } else {
+          newPriority = true;
+        }
+
+       axios.put("http://localhost:3000/api/items/" + item.id, {
+         priority: newPriority
+       }).then(response => {
+	 this.getItems();
+	 return true;
+       }).catch(err => {
+       });
+     },
+     deleteItem: function(item) {
+       axios.delete("http://localhost:3000/api/items/" + item.id).then(response => {
+	 this.getItems();
+	 return true;
+       }).catch(err => {
+       });
+     }
 	}
 }
 </script>
@@ -118,7 +186,6 @@ export default {
       }
 
       .gitHubLink {
-        background-color: #800000;
         padding: 3%;
       }
 </style>
