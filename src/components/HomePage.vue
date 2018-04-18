@@ -106,7 +106,7 @@ export default {
 
 
     getItems: function() {
-       axios.get("http://localhost:3000/api/items").then(response => {
+       axios.get("http://digitaldog.me:3000/api/items").then(response => {
 	 this.items = response.data;
 	 return true;
        }).catch(err => {
@@ -117,7 +117,7 @@ export default {
           return;
        }
 
-       axios.post("http://localhost:3000/api/items", {
+       axios.post("http://digitaldog.me:3000/api/items", {
 	 text: this.text
        }).then(response => {
 	 this.text = "";
@@ -134,7 +134,7 @@ export default {
           newPriority = true;
         }
 
-       axios.put("http://localhost:3000/api/items/" + item.id, {
+       axios.put("http://digitaldog.me:3000/api/items/" + item.id, {
          priority: newPriority
        }).then(response => {
 	 this.getItems();
@@ -143,7 +143,7 @@ export default {
        });
      },
      deleteItem: function(item) {
-       axios.delete("http://localhost:3000/api/items/" + item.id).then(response => {
+       axios.delete("http://digitaldog.me:3000/api/items/" + item.id).then(response => {
 	 this.getItems();
 	 return true;
        }).catch(err => {
